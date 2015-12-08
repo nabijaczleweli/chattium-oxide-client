@@ -1,14 +1,13 @@
-use std::net::TcpStream;
-use std::io::{Read, Write};
+extern crate hyper;
+
+use hyper::client::Client;
+
 
 fn main() {
-	let mut strm = TcpStream::connect("127.0.0.1:50030").ok().unwrap();
-	println!("{:?}", strm);
+	let client = Client::new();
 
-	println!("{:?}", strm.write(&[0x41]));
-	println!("{:?}", strm.flush());
-
-	let mut rr = String::new();
-	println!("{:?}", strm.read_to_string(&mut rr).unwrap());
-	println!("{}", rr);
+	match client.post("http://127.0.0.1:50030").body("BODY").send() {
+		Ok(response) => println!("Server responded with status {}", response.status),
+		Err(error) => println!("Error {}", error),
+	}
 }
