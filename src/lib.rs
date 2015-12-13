@@ -18,6 +18,11 @@ pub struct Options {
 
 
 impl Options {
+	/// Parses commandline arguments into an [`Options`](#) instance
+	///
+	/// Optionally reads from a config file in [YAML](http://yaml.org) format, however commandline arguments take preference thereover.
+	/// The config file format is trivial: all root keys and values are of the same name and format as long commandline arguments,
+	/// see `"example/config.yml"`.
 	pub fn parse() -> Options {
 		const USAGE: &'static str = "-c --config=[conf]   'Sets config file to load, values will be overriden by commandline args'
 		                             -n --name [name]     'Sets username, will prompt if not specified nor determined'
