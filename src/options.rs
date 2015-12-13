@@ -2,7 +2,6 @@ use clap::App as Clapp;
 use std::io::{self, Write};
 use std::env::home_dir;
 use std::fmt::Arguments as FormatArguments;
-use std::process::exit;
 use std::path::PathBuf;
 use yaml_file_handler::yaml_handler::FileHandler as YamlFileHandler;
 
@@ -68,10 +67,7 @@ impl Options {
 					while tname.is_none() {
 						match read_prompted(format_args!("No username specified and none could be determined.\nPlease type in your username now: ")) {
 							Ok(rname) => tname = rname,
-							Err(error) => {
-								println!("Couldn't read username: {}", error);
-								exit(1);
-							},
+							Err(error) => println!("Couldn't read username: {}", error),
 						}
 					}
 					tname.unwrap()
@@ -84,10 +80,7 @@ impl Options {
 			while tserver.is_none() {
 				match read_prompted(format_args!("No server specified.\nPlease type in the server address now: ")) {
 					Ok(rserver) => tserver = rserver,
-					Err(error) => {
-						println!("Couldn't read server: {}", error);
-						exit(1);
-					},
+					Err(error) => println!("Couldn't read server: {}", error),
 				}
 			}
 			server = tserver;

@@ -1,4 +1,4 @@
-# Remember to also update in lib.rs#Options::load()
+# Remember to also update in options.rs#Options::parse()
 [package]
 name = "chattium-oxide-client"
 description = "Chat client for chattium-oxide-server"
