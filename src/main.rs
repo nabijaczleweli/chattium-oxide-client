@@ -1,11 +1,14 @@
-extern crate chattium_oxide_client;
 extern crate chattium_oxide_lib;
+extern crate yaml_file_handler;
 extern crate hyper;
+extern crate clap;
 
+mod options;
+
+use options::Options;
 use hyper::client::Client;
 use chattium_oxide_lib::{ChatMessage, ChatUser};
 use chattium_oxide_lib::json::ToJsonnable;
-use chattium_oxide_client::Options;
 
 
 fn main() {
