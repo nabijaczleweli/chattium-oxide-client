@@ -41,7 +41,7 @@ impl Options {
 				if let Some(yaml) = yaml.read_all_files().as_ref().map(|all| {
 					let mut b = PathBuf::from(conf);
 					b.set_extension("");
-					&all[b.to_str().unwrap()]
+					&all[b.file_name().unwrap().to_str().unwrap()]
 				}) {
 					name = yaml["name"].as_str().map(|n| n.to_string());
 					server = yaml["server"].as_str().map(|n| n.to_string());
