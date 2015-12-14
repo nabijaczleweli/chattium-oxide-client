@@ -40,7 +40,7 @@ impl Options {
 					&all[b.file_name().unwrap().to_str().unwrap()]
 				}) {
 					name = yaml["name"].as_str().map(|n| n.to_string());
-					server = yaml["server"].as_str().map(|n| n.to_string());
+					server = yaml["server"].as_str().map(|s| s.to_string());
 				}
 			}
 		}
