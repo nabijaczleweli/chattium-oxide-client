@@ -1,9 +1,8 @@
 use clap::App as Clapp;
-use std::io::{self, Write};
 use std::env::home_dir;
-use std::fmt::Arguments as FormatArguments;
 use std::path::PathBuf;
 use yaml_file_handler::yaml_handler::FileHandler as YamlFileHandler;
+use io::read_prompted;
 
 
 #[derive(Debug)]
@@ -106,17 +105,4 @@ fn username() -> Option<String> {
 			},
 		None => None,
 	}
-}
-
-fn read_prompted(prompt: FormatArguments) -> io::Result<Option<String>> {
-	try!(io::stdout().write_fmt(prompt));
-	try!(io::stdout().flush());
-
-	let mut obuf = String::new();
-	try!(io::stdin().read_line(&mut obuf));  // Don't match on this directly, because it returns with "\r\n"
-	let obuf = obuf.trim();
-	Ok(match obuf.len() {
-		0 => None,
-		_ => Some(obuf.trim().to_string()),
-	})
 }
