@@ -23,9 +23,9 @@ fn main() {
 			Ok(json) =>
 				match client.post(&*&options.server).body(&*&json).send() {
 					Ok(response) => println!("Server responded with status {}", response.status),
-					Err(error) => {let _ = stderr().write_fmt(format_args!("POSTing the message failed: {}", error));},
+					Err(error) => {let _ = stderr().write_fmt(format_args!("POSTing the message failed: {}\n", error));},
 				},
-			Err(error) => {let _ = stderr().write_fmt(format_args!("Couldn't serialize message: {}", error));},
+			Err(error) => {let _ = stderr().write_fmt(format_args!("Couldn't serialize message: {}\n", error));},
 		}
 	}
 }
