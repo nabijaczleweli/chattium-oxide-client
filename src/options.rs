@@ -5,7 +5,7 @@ use yaml_file_handler::yaml_handler::FileHandler as YamlFileHandler;
 use io::read_prompted;
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Options {
 	pub name: String,
 	pub server: String,
