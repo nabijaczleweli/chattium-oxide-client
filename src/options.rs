@@ -44,21 +44,25 @@ impl Options {
 			}
 		}
 
-		if let Some(cname)   = matches.value_of("name")   {name   = Some(cname.to_string())}
-		if let Some(cserver) = matches.value_of("server") {server = Some(cserver.to_string())}
+		if let Some(cname)   = matches.value_of("name")   {if cname.len()   > 0 {name   = Some(cname.to_string())}}
+		if let Some(cserver) = matches.value_of("server") {if cserver.len() > 0 {server = Some(cserver.to_string())}}
 
 		if name.is_none() {
 			name = Some(match username() {
 				Some(uname) =>
-					match read_prompted(format_args!("Determined your username to {}.\nIf that's incorrect, type in your name now. Otherwise, hit <Return>: ", uname)) {
-						Ok(rname) =>
-							match rname {
-								Some(rname) => rname,
-								None => uname,
-							},
-						Err(_) => {
-							println!("Failed to read custom name, assuming default OK.");
-							uname
+					if let Some("") = matches.value_of("name") {
+						uname
+					} else {
+						match read_prompted(format_args!("Determined your username to {}.\nIf that's incorrect, type in your name now. Otherwise, hit <Return>: ", uname)) {
+							Ok(rname) =>
+								match rname {
+									Some(rname) => rname,
+									None => uname,
+								},
+							Err(_) => {
+								println!("Failed to read custom name, assuming default OK.");
+								uname
+							}
 						}
 					},
 				None => {
