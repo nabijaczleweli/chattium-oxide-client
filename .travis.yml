@@ -5,6 +5,7 @@ rust:
   - nightly
 
 install:
+  - mkdir ~/lib
   - curl -L $(sed 's/"//g' Cargo.toml | awk '/bear-lib-terminal.*/ {print "https://github.com/nabijaczleweli/BearLibTerminal.rs/releases/download/v" $3 "/libBearLibTerminal.so"}') -o ~/lib/libBearLibTerminal.so
 
 script:
