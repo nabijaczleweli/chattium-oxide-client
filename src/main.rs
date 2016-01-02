@@ -18,7 +18,7 @@ use bear_lib_terminal::geometry::Point;
 use bear_lib_terminal::terminal::config;
 use chattium_oxide_lib::{ChatMessage, ChatUser};
 use chattium_oxide_lib::json::ToJsonnable;
-use response_request::response_request_loop;
+use response_request::ResponseRequester;
 
 pub use options::Options;
 
@@ -36,7 +36,7 @@ fn main() {
 	let getting_responses_options = options.clone();
 	let getting_responses_client = client.clone();
 	let getting_responses_going = keep_getting_responses.clone();
-	let getting_responses = thread::spawn(move || response_request_loop(getting_responses_options, getting_responses_client, getting_responses_going));
+	let getting_responses = thread::spawn(move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going).call());
 
 
 	while let Some(rmessage) = terminal::read_str(Point::new(0, 29), 500) {  // Let's assume 500 is the widest someone can exapnd teh terminal.
