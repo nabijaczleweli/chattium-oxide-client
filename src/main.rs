@@ -10,11 +10,11 @@ mod options;
 mod response_request;
 
 use std::thread;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 use std::io::{stderr, Write};
 use hyper::client::Client;
 use bear_lib_terminal::terminal;
-use bear_lib_terminal::geometry::Point;
+use bear_lib_terminal::geometry::{Point, Size};
 use bear_lib_terminal::terminal::config;
 use chattium_oxide_lib::{ChatMessage, ChatUser};
 use chattium_oxide_lib::json::ToJsonnable;
@@ -28,18 +28,21 @@ fn main() {
 	terminal::set(config::Window::empty().resizeable(true));
 	terminal::refresh();
 
-	let client = Arc::new(Client::new());
-	let options = Options::parse();
-	let keep_getting_responses = Arc::new(Mutex::new(true));
+	let client                 = Arc::new(Client::new());
+	let options                = Options::parse();
+	let keep_getting_responses = Arc::new(RwLock::new(true));
+	let terminal_size          = Arc::new(RwLock::new(Size::new(80, 30)));
 
 
-	let getting_responses_options = options.clone();
-	let getting_responses_client = client.clone();
-	let getting_responses_going = keep_getting_responses.clone();
-	let getting_responses = thread::spawn(move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going).call());
+	let getting_responses_options  = options.clone();
+	let getting_responses_client   = client.clone();
+	let getting_responses_going    = keep_getting_responses.clone();
+	let getting_responses_termsize = terminal_size.clone();
+	let getting_responses          = thread::spawn(
+		move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going, getting_responses_termsize).call());
 
 
-	while let Some(rmessage) = terminal::read_str(Point::new(0, 29), 500) {  // Let's assume 500 is the widest someone can exapnd teh terminal.
+	while let Some(rmessage) = terminal::read_str(Point::new(0, 29), terminal_size.read().unwrap().width) {
 		if !rmessage.is_empty() {
 			match ChatMessage::new(ChatUser::me(options.name.clone()), rmessage).to_json_string() {
 				Ok(json) =>
@@ -54,7 +57,7 @@ fn main() {
 
 
 	println!("Terminating...");
-	*keep_getting_responses.lock().unwrap() = false;
+	*keep_getting_responses.write().unwrap() = false;
 	if let Err(error) = getting_responses.join() {
 		let _ = stderr().write_fmt(format_args!("Response getter thread failed: {:?}\n", error));
 	}
