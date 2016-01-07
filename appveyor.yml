@@ -1,0 +1,57 @@
+version: 0.1.0-{build}
+
+skip_tags: false
+
+platform: x64
+configuration: Release
+
+clone_folder: C:\chattium-oxide-client
+
+install:
+  - echo cy8iLy9n > B64_PATTERN  # Base64-encoded s/"//g
+  - certutil -decode B64_PATTERN PATTERN
+  - awk '/bear-lib-terminal.*/ {print "https://github.com/nabijaczleweli/BearLibTerminal.rs/releases/download/v" $3 "/BearLibTerminal.dll"}' Cargo.toml | sed -f PATTERN > TEMP
+  - set/p BLT_LINK=<TEMP
+  - curl -L %BLT_LINK% -oC:\BearLibTerminal.dll
+  - mkdir artifacts
+  - copy C:\BearLibTerminal.dll artifacts
+  -
+  - curl -L https://static.rust-lang.org/dist/rust-beta-x86_64-pc-windows-gnu.msi -oC:\rust-beta-x86_64-pc-windows-gnu.msi
+  - start /w msiexec /qn /quiet /passive /a C:\rust-beta-x86_64-pc-windows-gnu.msi TARGETDIR="C:\Program Files"
+  -
+  - set PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%;C:\Program Files\Rust\bin;C:\
+  - set LIBRARY_PATH=C:\
+  -
+  - bash -lc "pacman --needed --noconfirm -Sy pacman-mirrors"
+  - bash -lc "pacman --noconfirm -Sy"
+  - bash -lc "pacman --noconfirm -S mingw-w64-x86_64-toolchain"
+  -
+  - if "%APPVEYOR_REPO_TAG%" == "true" (set BUILD_OPTS=--release) else (set BUILD_OPTS=--verbose)
+
+build: off
+build_script:
+  - cargo build %BUILD_OPTS%
+  - if "%APPVEYOR_REPO_TAG%" == "true" copy target\release\chattium-oxide-client.exe artifacts\chattium-oxide-client.exe
+  - if "%APPVEYOR_REPO_TAG%" == "true" strip --strip-all --remove-section=.comment --remove-section=.note artifacts/chattium-oxide-client.exe
+
+test: off
+test_script:
+  - cargo test %BUILD_OPTS%
+
+artifacts:
+  - path: artifacts\chattium-oxide-client.exe
+  - path: artifacts\BearLibTerminal.dll
+
+deploy:
+  provider: GitHub
+  artifact: /artifacts\/.*/
+  auth_token:
+    secure: +Z0gDrwqKHeDsAd3OiG45KXoPidtiNSsa5le3wfPj/YhOwlnSNOLFLuM7pccti50
+  on:
+    appveyor_repo_tag: true
+
+notifications:
+  - provider: Email
+    to:
+      - nabijaczleweli@gmail.com
+    on_build_status_changed: true
