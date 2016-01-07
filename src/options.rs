@@ -20,10 +20,10 @@ impl Options {
 	/// see `"example/config.yml"`.
 	pub fn parse() -> Options {
 		const USAGE: &'static str = "-c --config=[conf]   'Sets config file to load, values will be overriden by commandline args'
-		                             -n --name [name]     'Sets username, will prompt if not specified nor determined'
+		                             -n --name   [name]   'Sets username, will prompt if not specified nor determined'
 		                             -s --server [server] 'Sets the server to connect to'";
 
-		let matches = Clapp::new("chattium-oxide-client").version("0.1.0")
+		let matches = Clapp::new("chattium-oxide-client").version(env!("CARGO_PKG_VERSION"))
 		                                                 .author("nabijaczleweli <nabijaczleweli@gmail.com>")
 		                                                 .about("Chat client for chattium-oxide-server")
 		                                                 .args_from_usage(USAGE)
