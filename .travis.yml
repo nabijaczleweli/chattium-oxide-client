@@ -3,9 +3,22 @@ rust:
   - stable
   - beta
   - nightly
+
 matrix:
   allow_failures:
     - rust: nightly
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "XtXxF4HqgzCfSFGSK67vTWtesunV6GCsaWxgO1WCFKPRKCAvEps3kHRNx7W3Bq6fc1EKSO/jRkEJs6L6L0Keuzmv6d6r99YYUcqFyoWzzQviUgq/bjRbsvkDu5IDVsWb4jPplJeTZ1T4RSHwDrYPT9GoH9/eE6leg93VuKnsUyaCj+OKCciZI0ZzGQRGaKPdX9NsqphKx+cERaVhu2UBw8ijQmh4QVB3PO43y5IX3qdEptfg5VbpNvVikdt204NIfDYUeQLIaq5u/5LyZunv0xhyTq3nYGXBJDk+oKmSXvHEWJGOt53/VScvc8lm//p019RtSiIA1zQpc372kzg/RbcOROvxTczDJNLUg1P95+MaCMbfz8UHBdsgf4pwlrqdVgxlMLVl4sqlwblg2fcFsayljqeB//fTJAYfjH16vzpD9HZh4c3S1aHfy9Unys/+UXH7NU7CVYGOtNkxKkKva3Ab85zPHZxMkpthjkKQh5v5blZU63EddUSPVmc9rWHj71iBd8PMFLkpL/yVdZmrwcxZIPLS9Hol+D014x/eiZfypLo2pA921DOD56QCZ/xDXt1qF0jLg4fWZ+UxvpiZk9YrovtfXP+/eq4s7pmV9I7a7eIhjcfzLJlN8A7CFtAItWLibyExV94hAnAoKrVfUaSzEEFxfko3Bd/MGFqCp8A="
+  file:
+    - "$HOME/lib/libBearLibTerminal.so"  # Push it here as well for easy access
+    - target/release/chattium-oxide-client
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: $TRAVIS_RUST_VERSION = stable
 
 install:
   - mkdir ~/lib
@@ -14,3 +27,7 @@ install:
 script:
   - LD_PRELOAD=~/lib/libBearLibTerminal.so LD_LIBRARY_PATH="~/lib:$LD_LIBRARY_PATH" LIBRARY_PATH=~/lib cargo build --verbose
   - LD_PRELOAD=~/lib/libBearLibTerminal.so LD_LIBRARY_PATH="~/lib:$LD_LIBRARY_PATH" LIBRARY_PATH=~/lib cargo test --verbose
+
+before_deploy:
+  - LD_PRELOAD=~/lib/libBearLibTerminal.so LD_LIBRARY_PATH="~/lib:$LD_LIBRARY_PATH" LIBRARY_PATH=~/lib cargo build --release
+  - strip --strip-all --remove-section=.comment --remove-section=.note target/release/chattium-oxide-client
