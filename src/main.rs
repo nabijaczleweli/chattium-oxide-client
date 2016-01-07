@@ -13,9 +13,8 @@ use std::thread;
 use std::sync::{Arc, RwLock};
 use std::io::{stderr, Write};
 use hyper::client::Client;
-use bear_lib_terminal::terminal;
-use bear_lib_terminal::geometry::{Point, Size};
-use bear_lib_terminal::terminal::config;
+use bear_lib_terminal::geometry::Point;
+use bear_lib_terminal::terminal::{self, config};
 use chattium_oxide_lib::{ChatMessage, ChatUser};
 use chattium_oxide_lib::json::ToJsonnable;
 use response_request::ResponseRequester;
@@ -31,18 +30,16 @@ fn main() {
 	let client                 = Arc::new(Client::new());
 	let options                = Options::parse();
 	let keep_getting_responses = Arc::new(RwLock::new(true));
-	let terminal_size          = Arc::new(RwLock::new(Size::new(80, 30)));
 
 
 	let getting_responses_options  = options.clone();
 	let getting_responses_client   = client.clone();
 	let getting_responses_going    = keep_getting_responses.clone();
-	let getting_responses_termsize = terminal_size.clone();
 	let getting_responses          = thread::spawn(
-		move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going, getting_responses_termsize).call());
+		move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going).call());
 
 
-	while let Some(rmessage) = terminal::read_str(Point::new(0, 29), terminal_size.read().unwrap().width) {
+	while let Some(rmessage) = terminal::read_str(Point::new(0, 29), terminal::state::size().width) {
 		if !rmessage.is_empty() {
 			match ChatMessage::new(ChatUser::me(options.name.clone()), rmessage).to_json_string() {
 				Ok(json) =>

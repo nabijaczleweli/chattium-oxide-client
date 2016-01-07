@@ -15,17 +15,15 @@ pub struct ResponseRequester {
 	server: String,
 	client: Arc<Client>,
 	keep_going: Arc<RwLock<bool>>,
-	terminal_size: Arc<RwLock<Size>>,
 	messages: Vec<ChatMessage>,
 }
 
 
 impl ResponseRequester {
-	pub fn new(options: Options, client: Arc<Client>, keep_going: Arc<RwLock<bool>>, term_size: Arc<RwLock<Size>>) -> ResponseRequester {
+	pub fn new(options: Options, client: Arc<Client>, keep_going: Arc<RwLock<bool>>) -> ResponseRequester {
 		ResponseRequester{
 			server: options.server,
 			client: client,
-			terminal_size: term_size,
 			keep_going: keep_going,
 			messages: Vec::new(),
 		}
@@ -68,7 +66,7 @@ impl ResponseRequester {
 
 
 	fn print_messages(&self) {
-		let size = *self.terminal_size.read().unwrap();
+		let size = terminal::state::size();
 		terminal::clear(Some(Rect::from_size(Point::new(0, 0), Size::new(size.width, size.height - 2))));
 		for (i, message) in self.messages.iter().rev().take((size.height - 2) as usize).enumerate() {
 			terminal::print_xy(0, size.height - 3 - i as i32,
@@ -78,7 +76,7 @@ impl ResponseRequester {
 	}
 
 	fn draw_line(&self) {
-		let size = *self.terminal_size.read().unwrap();
+		let size = terminal::state::size();
 		for x in 0..size.width {
 			terminal::put_xy(x, size.height - 2, '—')
 		}
