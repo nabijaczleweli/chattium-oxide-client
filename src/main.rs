@@ -31,15 +31,17 @@ fn main() {
 	let options                = Options::parse();
 	let keep_getting_responses = Arc::new(RwLock::new(true));
 
+	terminal::set(config::Window::empty().title(format!("chattium-oxide client — Connected to {} as {}", options.server, options.name)));
+
 
 	let getting_responses_options  = options.clone();
 	let getting_responses_client   = client.clone();
 	let getting_responses_going    = keep_getting_responses.clone();
-	let getting_responses          = thread::spawn(
-		move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going).call());
+	let getting_responses          =
+		thread::spawn(move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going).call());
 
 
-	while let Some(rmessage) = terminal::read_str(Point::new(0, 29), terminal::state::size().width) {
+	while let Some(rmessage) = terminal::read_str(Point::new(0, terminal::state::size().height - 1), terminal::state::size().width) {
 		if !rmessage.is_empty() {
 			match ChatMessage::new(ChatUser::me(options.name.clone()), rmessage).to_json_string() {
 				Ok(json) =>

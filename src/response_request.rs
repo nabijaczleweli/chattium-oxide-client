@@ -34,6 +34,8 @@ impl ResponseRequester {
 
 		let mut newest = now_utc();
 		while *self.keep_going.read().unwrap() {
+			self.draw_line();
+
 			let just_before = now_utc();
 			match newest.to_json_string() {
 				Ok(json) =>
@@ -48,7 +50,7 @@ impl ResponseRequester {
 											self.print_messages();
 										},
 										Err(error) =>
-											{let _ = stderr().write_fmt(format_args!("Server at {} replied with unprocessable entity (invalid JSON): {}\n", self.server, error));},
+											{let _ = stderr().write_fmt(format_args!("Server at {} replied with invalid JSON: {}\n", self.server, error));},
 									},
 								Err(error) => {let _ = stderr().write_fmt(format_args!("Failed reading request from server at {}: {}\n", res.url, error));},
 							}
