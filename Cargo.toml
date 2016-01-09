@@ -5,6 +5,7 @@ repository = "https://github.com/nabijaczleweli/chattium-oxide-client"
 readme = "README.md"
 keywords = ["chattium-oxide", "chat"]
 license = "MIT"
+# Also update in appveyor.yml
 version = "0.1.0"
 authors = ["nabijaczleweli <nabijaczleweli@gmail.com>"]
 
