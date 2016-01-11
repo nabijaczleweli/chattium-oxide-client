@@ -1,14 +1,14 @@
 use Options;
+use std::io::{stderr, Read, Write};
 use std::sync::{Arc, RwLock};
 use std::thread::sleep_ms;
+use time::strftime;
 use hyper::client::Client;
 use hyper::method::Method;
-use time::{now_utc, strftime};
-use std::io::{stderr, Read, Write};
 use bear_lib_terminal::terminal;
 use bear_lib_terminal::geometry::{Size, Rect, Point};
 use chattium_oxide_lib::ChatMessage;
-use chattium_oxide_lib::json::{ToJsonnable, FromJsonnable};
+use chattium_oxide_lib::json::{ToJsonnable, FromJsonnable, JsonError};
 
 
 pub struct ResponseRequester {
@@ -32,12 +32,10 @@ impl ResponseRequester {
 	pub fn call(mut self) {
 		self.draw_line();
 
-		let mut newest = now_utc();
 		while *self.keep_going.read().unwrap() {
 			self.draw_line();
 
-			let just_before = now_utc();
-			match newest.to_json_string() {
+			match self.request_message() {
 				Ok(json) =>
 					match self.client.request(Method::Trace, &*&self.server).body(&*&json).send() {
 						Ok(mut res) => {
@@ -56,12 +54,11 @@ impl ResponseRequester {
 							}
 						},
 						Err(error) =>
-							{let _ = stderr().write_fmt(format_args!("GETing new (before {}) messages failed: {}\n", strftime("%D %T", &newest).unwrap(), error));},
+							{let _ = stderr().write_fmt(format_args!("GETing new (before #{}) messages failed: {}\n", json, error));},
 					},
 				Err(error) => {let _ = stderr().write_fmt(format_args!("Couldn't serialize message: {}\n", error));},
 			}
 
-			newest = just_before;
 			sleep_ms(500);
 		}
 	}
@@ -83,5 +80,9 @@ impl ResponseRequester {
 			terminal::put_xy(x, size.height - 2, '—')
 		}
 		terminal::refresh();
+	}
+
+	fn request_message(&self) -> Result<String, JsonError> {
+		self.messages.iter().rev().next().map(|ref m| m.id).unwrap_or(0).to_json_string()
 	}
 }
