@@ -12,9 +12,13 @@ pub fn read_prompted(prompt: FormatArguments) -> io::Result<Option<String>> {
 pub fn read_unprompted() -> io::Result<Option<String>> {
 	let mut obuf = String::new();
 	try!(io::stdin().read_line(&mut obuf));  // Don't match on this directly, because it returns with "\r\n"
-	let obuf = obuf.trim();
-	Ok(match obuf.len() {
+	Ok(maybe_trimmed(obuf))
+}
+
+pub fn maybe_trimmed(buf: String) -> Option<String> {
+	let buf = buf.trim();
+	match buf.len() {
 		0 => None,
-		_ => Some(obuf.trim().to_string()),
-	})
+		_ => Some(buf.to_string())
+	}
 }
