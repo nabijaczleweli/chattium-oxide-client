@@ -1,8 +1,10 @@
+use yaml_file_handler::yaml_handler::FileHandler as YamlFileHandler;
+use bear_lib_terminal::geometry::Point;
+use bear_lib_terminal::terminal;
 use clap::App as Clapp;
 use std::env::home_dir;
 use std::path::PathBuf;
-use yaml_file_handler::yaml_handler::FileHandler as YamlFileHandler;
-use io::read_prompted;
+use io;
 
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -53,40 +55,42 @@ impl Options {
 					if let Some("") = matches.value_of("name") {
 						uname
 					} else {
-						match read_prompted(format_args!("Determined your username to {}.\nIf that's incorrect, type in your name now. Otherwise, hit <Return>: ", uname)) {
-							Ok(rname) =>
-								match rname {
-									Some(rname) => rname,
-									None => uname,
-								},
-							Err(_) => {
-								println!("Failed to read custom name, assuming default OK.");
-								uname
-							}
+						terminal::print_xy(0, 0, &*&format!("Determined your username to {}.
+If that's incorrect, type in your name now. Otherwise, hit <Return>: ", uname));
+						terminal::refresh();
+						match terminal::read_str(Point::new(0, 2), terminal::state::size().width).into_iter().flat_map(io::maybe_trimmed).next() {
+							Some(rname) => rname,
+							None        => uname,
 						}
 					},
 				None => {
 					let mut tname: Option<String> = None;
 					while tname.is_none() {
-						match read_prompted(format_args!("No username specified and none could be determined.\nPlease type in your username now: ")) {
-							Ok(rname) => tname = rname,
-							Err(error) => println!("Couldn't read username: {}", error),
+						terminal::print_xy(0, 0, "No username specified and none could be determined.");
+						let second_line = "Please type in your username now: ";
+						terminal::print_xy(0, 1, second_line);
+						terminal::refresh();
+						for rname in terminal::read_str(Point::new(second_line.len() as i32, 1), terminal::state::size().width).into_iter().flat_map(io::maybe_trimmed) {
+							tname = Some(rname);
 						}
 					}
 					tname.unwrap()
 				},
 			});
+			terminal::clear(None);
 		}
 
 		if server.is_none() {
-			let mut tserver: Option<String> = None;
-			while tserver.is_none() {
-				match read_prompted(format_args!("No server specified.\nPlease type in the server address now: ")) {
-					Ok(rserver) => tserver = rserver,
-					Err(error) => println!("Couldn't read server: {}", error),
+			terminal::print_xy(0, 0, "No server specified.\nPlease type in the server address now: ");
+			terminal::refresh();
+			loop {
+				if let Some(rserver) = terminal::read_str(Point::new(0, 2), terminal::state::size().width).into_iter().flat_map(io::maybe_trimmed).next() {
+					server = Some(rserver);
+					break;
 				}
 			}
-			server = tserver;
+			terminal::clear(None);
+			terminal::refresh();
 		}
 
 		assert!(name.is_some());
