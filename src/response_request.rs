@@ -66,12 +66,15 @@ impl ResponseRequester {
 
 	fn print_messages(&self) {
 		let size = terminal::state::size();
-		terminal::clear(Some(Rect::from_size(Point::new(0, 0), Size::new(size.width, size.height - 2))));
-		for (i, message) in self.messages.iter().rev().take((size.height - 2) as usize).enumerate() {
-			terminal::print_xy(0, size.height - 3 - i as i32,
-			                   &*&format!("{} | {}: {}", strftime("%T", &message.time_posted).unwrap(), message.sender.name, message.value));
+
+		if size.height != 0 {  // Terminal dead otherwise
+			terminal::clear(Some(Rect::from_size(Point::new(0, 0), Size::new(size.width, size.height - 2))));
+			for (i, message) in self.messages.iter().rev().take((size.height - 2) as usize).enumerate() {
+				terminal::print_xy(0, size.height - 3 - i as i32,
+				                   &*&format!("{} | {}: {}", strftime("%T", &message.time_posted).unwrap(), message.sender.name, message.value));
+			}
+			terminal::refresh();
 		}
-		terminal::refresh();
 	}
 
 	fn draw_line(&self) {
