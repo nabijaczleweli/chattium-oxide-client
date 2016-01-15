@@ -33,6 +33,13 @@ fn main() {
 	terminal::set(config::Window::empty().title(format!("chattium-oxide client — Connected to {} as {}", options.server, options.name)));
 
 
+	let writing_messages = {
+		let writing_messages_options = options.clone();
+		let writing_messages_client  = client.clone();
+
+		thread::spawn(move || MessageWriter::new(writing_messages_options, writing_messages_client).call())
+	};
+
 	let getting_responses = {
 		let getting_responses_options = options.clone();
 		let getting_responses_client  = client.clone();
@@ -41,14 +48,11 @@ fn main() {
 		thread::spawn(move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going).call())
 	};
 
-	let writing_messages = {
-		let writing_messages_options = options.clone();
-		let writing_messages_client  = client.clone();
-		let writing_messages_going   = continue_threads.clone();
 
-		thread::spawn(move || MessageWriter::new(writing_messages_options, writing_messages_client, writing_messages_going).call())
-	};
+	for _ in terminal::events() {}
 
+
+	*continue_threads.write().unwrap() = false;
 
 	if let Err(error) = getting_responses.join() {
 		let _ = stderr().write_fmt(format_args!("Response getter thread failed: {:?}\n", error));

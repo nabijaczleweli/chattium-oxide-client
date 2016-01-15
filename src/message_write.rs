@@ -1,6 +1,6 @@
 use Options;
 use std::io::{stderr, Write};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 use hyper::client::Client;
 use bear_lib_terminal::terminal;
 use bear_lib_terminal::geometry::Point;
@@ -12,17 +12,15 @@ pub struct MessageWriter {
 	username: String,
 	server: String,
 	client: Arc<Client>,
-	keep_going: Arc<RwLock<bool>>,
 }
 
 
 impl MessageWriter {
-	pub fn new(options: Options, client: Arc<Client>, keep_going: Arc<RwLock<bool>>) -> MessageWriter {
+	pub fn new(options: Options, client: Arc<Client>) -> MessageWriter {
 		MessageWriter{
 			username: options.name,
 			server: options.server,
 			client: client,
-			keep_going: keep_going,
 		}
 	}
 
@@ -41,6 +39,6 @@ impl MessageWriter {
 		}
 
 		println!("Terminating...");
-		*self.keep_going.write().unwrap() = false;
+		terminal::close();
 	}
 }
