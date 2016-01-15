@@ -7,17 +7,16 @@ extern crate time;
 
 mod io;
 mod options;
+mod message_write;
 mod response_request;
 
-use std::thread;
-use std::sync::{Arc, RwLock};
 use std::io::{stderr, Write};
+use std::sync::{Arc, RwLock};
+use std::thread;
 use hyper::client::Client;
-use bear_lib_terminal::geometry::Point;
-use bear_lib_terminal::terminal::{self, config};
-use chattium_oxide_lib::{ChatMessage, ChatUser};
-use chattium_oxide_lib::json::ToJsonnable;
+use message_write::MessageWriter;
 use response_request::ResponseRequester;
+use bear_lib_terminal::terminal::{self, config};
 
 pub use options::Options;
 
@@ -27,38 +26,35 @@ fn main() {
 	terminal::set(config::Window::empty().resizeable(true));
 	terminal::refresh();
 
-	let client                 = Arc::new(Client::new());
-	let options                = Options::parse();
-	let keep_getting_responses = Arc::new(RwLock::new(true));
+	let client           = Arc::new(Client::new());
+	let options          = Options::parse();
+	let continue_threads = Arc::new(RwLock::new(true));
 
 	terminal::set(config::Window::empty().title(format!("chattium-oxide client — Connected to {} as {}", options.server, options.name)));
 
 
-	let getting_responses_options  = options.clone();
-	let getting_responses_client   = client.clone();
-	let getting_responses_going    = keep_getting_responses.clone();
-	let getting_responses          =
-		thread::spawn(move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going).call());
+	let getting_responses = {
+		let getting_responses_options = options.clone();
+		let getting_responses_client  = client.clone();
+		let getting_responses_going   = continue_threads.clone();
+
+		thread::spawn(move || ResponseRequester::new(getting_responses_options, getting_responses_client, getting_responses_going).call())
+	};
+
+	let writing_messages = {
+		let writing_messages_options = options.clone();
+		let writing_messages_client  = client.clone();
+		let writing_messages_going   = continue_threads.clone();
+
+		thread::spawn(move || MessageWriter::new(writing_messages_options, writing_messages_client, writing_messages_going).call())
+	};
 
 
-	while let Some(rmessage) = terminal::read_str(Point::new(0, terminal::state::size().height - 1), terminal::state::size().width) {
-		if !rmessage.is_empty() {
-			match ChatMessage::new(ChatUser::me(options.name.clone()), rmessage).to_json_string() {
-				Ok(json) =>
-					match client.post(&*&options.server).body(&*&json).send() {
-						Ok(response) => println!("Server responded with status {}", response.status),
-						Err(error) => {let _ = stderr().write_fmt(format_args!("POSTing the message failed: {}\n", error));},
-					},
-				Err(error) => {let _ = stderr().write_fmt(format_args!("Couldn't serialize message: {}\n", error));},
-			}
-		}
-	}
-
-
-	println!("Terminating...");
-	*keep_getting_responses.write().unwrap() = false;
 	if let Err(error) = getting_responses.join() {
 		let _ = stderr().write_fmt(format_args!("Response getter thread failed: {:?}\n", error));
+	}
+	if let Err(error) = writing_messages.join() {
+		let _ = stderr().write_fmt(format_args!("Message writer thread failed: {:?}\n", error));
 	}
 
 	terminal::close();
