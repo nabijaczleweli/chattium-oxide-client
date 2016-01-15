@@ -49,9 +49,15 @@ fn main() {
 	};
 
 
-	for _ in terminal::events() {}
+	while let Some(e) = terminal::wait_event() {
+		match e {
+			terminal::Event::KeyReleased{key: terminal::KeyCode::Escape, ctrl: _, shift: _} | terminal::Event::Close => break,
+			_                                                                                                        => (),
+		}
+	}
 
 
+	println!("Terminating...");
 	*continue_threads.write().unwrap() = false;
 
 	if let Err(error) = getting_responses.join() {

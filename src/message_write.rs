@@ -37,8 +37,5 @@ impl MessageWriter {
 				}
 			}
 		}
-
-		println!("Terminating...");
-		terminal::close();
 	}
 }
