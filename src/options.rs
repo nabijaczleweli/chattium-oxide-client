@@ -1,7 +1,8 @@
 use yaml_file_handler::yaml_handler::FileHandler as YamlFileHandler;
-use bear_lib_terminal::geometry::Point;
+use bear_lib_terminal::geometry::{Point, Rect};
 use bear_lib_terminal::terminal;
 use clap::App as Clapp;
+use std::net::ToSocketAddrs;
 use std::env::home_dir;
 use std::path::PathBuf;
 use io;
@@ -80,13 +81,31 @@ If that's incorrect, type in your name now. Otherwise, hit <Return>: ", uname));
 			terminal::clear(None);
 		}
 
+		if server.is_some() {
+			server = match validate_address(server.unwrap()) {
+				Ok(sserver) => Some(sserver),
+				Err(error)  => {
+					terminal::print_xy(0, 3, &*&error);
+					None
+				},
+			}
+		}
 		if server.is_none() {
 			terminal::print_xy(0, 0, "No server specified.\nPlease type in the server address now: ");
 			terminal::refresh();
 			loop {
 				if let Some(rserver) = terminal::read_str(Point::new(0, 2), terminal::state::size().width).into_iter().flat_map(io::maybe_trimmed).next() {
-					server = Some(rserver);
-					break;
+					match validate_address(rserver) {
+						Ok(rserver) => {
+							server = Some(rserver);
+							break;
+						},
+						Err(error) => {
+							terminal::clear(Some(Rect::from_size(Point::new(0, 3), terminal::state::size())));
+							terminal::print_xy(0, 3, &*&error);
+							terminal::refresh();
+						},
+					}
 				}
 			}
 			terminal::clear(None);
@@ -112,5 +131,12 @@ fn username() -> Option<String> {
 				None => None,
 			},
 		None => None,
+	}
+}
+
+fn validate_address(address: String) -> Result<String, String> {
+	match (&*&address).to_socket_addrs() {
+		Ok(_)      => Ok(address),
+		Err(error) => Err(format!("{}", error)),
 	}
 }
