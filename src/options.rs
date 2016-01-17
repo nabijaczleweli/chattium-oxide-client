@@ -2,6 +2,8 @@ use yaml_file_handler::yaml_handler::FileHandler as YamlFileHandler;
 use bear_lib_terminal::geometry::{Point, Rect};
 use bear_lib_terminal::terminal;
 use clap::App as Clapp;
+use std::cmp::max;
+use std::str::FromStr;
 use std::net::ToSocketAddrs;
 use std::env::home_dir;
 use std::path::PathBuf;
@@ -12,6 +14,7 @@ use io;
 pub struct Options {
 	pub name: String,
 	pub server: String,
+	pub splash: i32,
 }
 
 
@@ -24,6 +27,7 @@ impl Options {
 	pub fn parse() -> Options {
 		const USAGE: &'static str = "-c --config=[conf]   'Sets config file to load, values will be overriden by commandline args'
 		                             -n --name   [name]   'Sets username, will prompt if not specified nor determined'
+		                                --splash=[splash] 'Sets the amount of milliseconds the splash will be shown for (0 — off; default/invalid — 1000)'
 		                             -s --server [server] 'Sets the server to connect to'";
 
 		let matches = Clapp::new("chattium-oxide-client").version(env!("CARGO_PKG_VERSION"))
@@ -31,8 +35,10 @@ impl Options {
 		                                                 .about("Chat client for chattium-oxide-server")
 		                                                 .args_from_usage(USAGE)
 		                                                 .get_matches();
-		let mut name: Option<String> = None;
+		let mut name  : Option<String> = None;
 		let mut server: Option<String> = None;
+		let mut splash: Option<String> = Some("1000".to_string());
+
 		if let Some(conf) = matches.value_of("conf") {
 			let mut yaml = YamlFileHandler::new();
 			if yaml.add_files(vec![conf]) {
@@ -41,14 +47,16 @@ impl Options {
 					b.set_extension("");
 					&all[b.file_name().unwrap().to_str().unwrap()]
 				}) {
-					name = yaml["name"].as_str().map(|n| n.to_string());
+					name   = yaml["name"]  .as_str().map(|n| n.to_string());
 					server = yaml["server"].as_str().map(|s| s.to_string());
+					splash = yaml["splash"].as_str().map(|s| s.to_string());
 				}
 			}
 		}
 
 		if let Some(cname)   = matches.value_of("name")   {if cname.len()   > 0 {name   = Some(cname.to_string())}}
 		if let Some(cserver) = matches.value_of("server") {if cserver.len() > 0 {server = Some(cserver.to_string())}}
+		if let Some(csplash) = matches.value_of("splash") {if csplash.len() > 0 {splash = Some(csplash.to_string())}}
 
 		if name.is_none() {
 			name = Some(match username() {
@@ -114,9 +122,11 @@ If that's incorrect, type in your name now. Otherwise, hit <Return>: ", uname));
 
 		assert!(name.is_some());
 		assert!(server.is_some());
+		assert!(splash.is_some());
 		Options{
 			name: name.unwrap(),
 			server: server.unwrap(),
+			splash: max(i32::from_str(&*&splash.unwrap()).unwrap_or(1000), 0),
 		}
 	}
 }
