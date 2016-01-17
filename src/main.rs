@@ -6,6 +6,7 @@ extern crate clap;
 extern crate time;
 
 mod io;
+mod splash;
 mod options;
 mod message_write;
 mod response_request;
@@ -25,45 +26,11 @@ fn main() {
 	terminal::open("chattium-oxide client", 80, 30);
 	terminal::set(config::Window::empty().resizeable(true));
 
-
-	terminal::print_xy(0, 0, r#"
-
-    ___           ___                         __________
-   |   |         |   |                       /          \
-   |   |         |   |                      /  _______   \
-   |   |         |   |                     /  /       \   \
-   |   |         |   |                    |  /         \   |
-   |   |_________|   |                    | |           |  |
-   |                 |                    | |           |  |
-    \                |                    | |           |  |
-     \__________     |                    | |           |  |
-                |    |                    | |           |  |
-                |    |     _______        | |           |  |
-                |    |    /       \       | |           |  |
-                |    |   /   ___   \      | |           |  |
-                |    |  |   /   \   |     | |           |  |
-                |    |  |  |     |  |     | |           |  |
-                |    |  |  |     |  ||    | |           |  |
-                |    |  |  | |   |  ||    | |           |  |
-                |    |  |  | |__/   ||    |  \         /   |
-                |    |  |  |        ||    |   \_______/    |
-                |    |  |   \______/ |     \              /
-                |    |   \          /       \            / __     ___       __
-                |____|    \________/         \__________/ /  \   /_  |     /  \
-                                                         | /\ |    | |    | /\ |
-                                                  _    _ ||  ||    | |    ||  ||
-                                                  \\  // | \/ | _  | |  _ | \/ |
-                                                   \\//   \__/ |_| |_| |_| \__/
-                                                    ‾‾
-                                                                                "#);
-	terminal::refresh();
-	terminal::delay(1000);
-	terminal::clear(None);
-
 	let client           = Arc::new(Client::new());
 	let options          = Options::parse();
 	let continue_threads = Arc::new(RwLock::new(true));
 
+	splash::display(&options);
 	terminal::set(config::Window::empty().title(format!("chattium-oxide client — Connected to {} as {}", options.server, options.name)));
 
 
