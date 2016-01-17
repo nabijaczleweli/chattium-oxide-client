@@ -24,7 +24,41 @@ pub use options::Options;
 fn main() {
 	terminal::open("chattium-oxide client", 80, 30);
 	terminal::set(config::Window::empty().resizeable(true));
+
+
+	terminal::print_xy(0, 0, r#"
+
+    ___           ___                         __________
+   |   |         |   |                       /          \
+   |   |         |   |                      /  _______   \
+   |   |         |   |                     /  /       \   \
+   |   |         |   |                    |  /         \   |
+   |   |_________|   |                    | |           |  |
+   |                 |                    | |           |  |
+    \                |                    | |           |  |
+     \__________     |                    | |           |  |
+                |    |                    | |           |  |
+                |    |     _______        | |           |  |
+                |    |    /       \       | |           |  |
+                |    |   /   ___   \      | |           |  |
+                |    |  |   /   \   |     | |           |  |
+                |    |  |  |     |  |     | |           |  |
+                |    |  |  |     |  ||    | |           |  |
+                |    |  |  | |   |  ||    | |           |  |
+                |    |  |  | |__/   ||    |  \         /   |
+                |    |  |  |        ||    |   \_______/    |
+                |    |  |   \______/ |     \              /
+                |    |   \          /       \            / __     ___       __
+                |____|    \________/         \__________/ /  \   /_  |     /  \
+                                                         | /\ |    | |    | /\ |
+                                                  _    _ ||  ||    | |    ||  ||
+                                                  \\  // | \/ | _  | |  _ | \/ |
+                                                   \\//   \__/ |_| |_| |_| \__/
+                                                    ‾‾
+                                                                                "#);
 	terminal::refresh();
+	terminal::delay(1000);
+	terminal::clear(None);
 
 	let client           = Arc::new(Client::new());
 	let options          = Options::parse();
