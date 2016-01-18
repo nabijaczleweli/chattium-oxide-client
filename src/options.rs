@@ -12,7 +12,7 @@ use io;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Options {
-	pub name: String,
+	pub name  : String,
 	pub server: String,
 	pub splash: i32,
 }

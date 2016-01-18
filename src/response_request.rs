@@ -12,20 +12,20 @@ use chattium_oxide_lib::json::{ToJsonnable, FromJsonnable, JsonError};
 
 
 pub struct ResponseRequester {
-	server: String,
-	client: Arc<Client>,
+	server    : String,
+	client    : Arc<Client>,
 	keep_going: Arc<RwLock<bool>>,
-	messages: Vec<ChatMessage>,
+	messages  : Vec<ChatMessage>,
 }
 
 
 impl ResponseRequester {
 	pub fn new(options: Options, client: Arc<Client>, keep_going: Arc<RwLock<bool>>) -> ResponseRequester {
 		ResponseRequester{
-			server: options.server,
-			client: client,
+			server    : options.server,
+			client    : client,
 			keep_going: keep_going,
-			messages: Vec::new(),
+			messages  : Vec::new(),
 		}
 	}
 
