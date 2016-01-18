@@ -124,7 +124,7 @@ If that's incorrect, type in your name now. Otherwise, hit <Return>: ", uname));
 		assert!(server.is_some());
 		assert!(splash.is_some());
 		Options{
-			name: name.unwrap(),
+			name  : name.unwrap(),
 			server: server.unwrap(),
 			splash: max(i32::from_str(&*&splash.unwrap()).unwrap_or(1000), 0),
 		}
