@@ -1,5 +1,5 @@
 use Options;
-use std::io::{stderr, Read, Write};
+use std::io::{Read, Write};
 use std::sync::{Arc, RwLock};
 use std::thread::sleep_ms;
 use time::strftime;
@@ -47,16 +47,14 @@ impl ResponseRequester {
 											self.messages.append(messages);
 											self.print_messages();
 										},
-										Err(error) =>
-											{let _ = stderr().write_fmt(format_args!("Server at {} replied with invalid JSON: {}\n", self.server, error));},
+										Err(error) => printerr!("Server at {} replied with invalid JSON: {}\n", self.server, error),
 									},
-								Err(error) => {let _ = stderr().write_fmt(format_args!("Failed reading request from server at {}: {}\n", res.url, error));},
+								Err(error) => printerr!("Failed reading request from server at {}: {}\n", res.url, error),
 							}
 						},
-						Err(error) =>
-							{let _ = stderr().write_fmt(format_args!("GETing new (before #{}) messages failed: {}\n", json, error));},
+						Err(error) => printerr!("GETing new (before #{}) messages failed: {}\n", json, error),
 					},
-				Err(error) => {let _ = stderr().write_fmt(format_args!("Couldn't serialize message: {}\n", error));},
+				Err(error) => printerr!("Couldn't serialize message: {}\n", error),
 			}
 
 			sleep_ms(500);

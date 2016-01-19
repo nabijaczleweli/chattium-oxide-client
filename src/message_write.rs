@@ -1,5 +1,4 @@
 use Options;
-use std::io::{stderr, Write};
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
 use hyper::client::Client;
@@ -40,9 +39,9 @@ impl MessageWriter {
 							Ok(json) =>
 								match self.client.post(&*&self.server).body(&*&json).send() {
 									Ok(response) => println!("Server responded with status {}", response.status),
-									Err(error) => {let _ = stderr().write_fmt(format_args!("POSTing the message failed: {}\n", error));},
+									Err(error)   => printerr!("POSTing the message failed: {}\n", error),
 								},
-							Err(error) => {let _ = stderr().write_fmt(format_args!("Couldn't serialize message: {}\n", error));},
+							Err(error) => printerr!("Couldn't serialize message: {}\n", error),
 						}
 
 						message = "".to_string();

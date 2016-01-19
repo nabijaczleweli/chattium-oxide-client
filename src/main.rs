@@ -5,13 +5,13 @@ extern crate hyper;
 extern crate clap;
 extern crate time;
 
+#[macro_use]
 mod io;
 mod splash;
 mod options;
 mod message_write;
 mod response_request;
 
-use std::io::{stderr, Write};
 use std::sync::{Arc, RwLock};
 use std::sync::mpsc::channel;
 use std::thread;
@@ -68,10 +68,10 @@ fn main() {
 	*continue_threads.write().unwrap() = false;
 
 	if let Err(error) = getting_responses.join() {
-		let _ = stderr().write_fmt(format_args!("Response getter thread failed: {:?}\n", error));
+		printerr!("Response getter thread failed: {:?}\n", error);
 	}
 	if let Err(error) = writing_messages.join() {
-		let _ = stderr().write_fmt(format_args!("Message writer thread failed: {:?}\n", error));
+		printerr!("Message writer thread failed: {:?}\n", error);
 	}
 
 	terminal::close();
