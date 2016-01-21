@@ -5,14 +5,15 @@ use std::thread::sleep_ms;
 use time::strftime;
 use hyper::client::Client;
 use hyper::method::Method;
-use bear_lib_terminal::terminal;
+use bear_lib_terminal::{terminal, Color};
 use bear_lib_terminal::geometry::{Size, Rect, Point};
-use chattium_oxide_lib::ChatMessage;
+use chattium_oxide_lib::{ChatMessage, ChatUser};
 use chattium_oxide_lib::json::{ToJsonnable, FromJsonnable, JsonError};
 
 
 pub struct ResponseRequester {
 	server    : String,
+	me        : ChatUser,
 	client    : Arc<Client>,
 	keep_going: Arc<RwLock<bool>>,
 	messages  : Vec<ChatMessage>,
@@ -23,6 +24,7 @@ impl ResponseRequester {
 	pub fn new(options: Options, client: Arc<Client>, keep_going: Arc<RwLock<bool>>) -> ResponseRequester {
 		ResponseRequester{
 			server    : options.server,
+			me        : ChatUser::me(options.name),
 			client    : client,
 			keep_going: keep_going,
 			messages  : Vec::new(),
@@ -68,8 +70,18 @@ impl ResponseRequester {
 		if size.height != 0 {  // Terminal dead otherwise
 			terminal::clear(Some(Rect::from_size(Point::new(0, 0), Size::new(size.width, size.height - 2))));
 			for (i, message) in self.messages.iter().rev().take((size.height - 2) as usize).enumerate() {
+				let is_own = message.sender == self.me;
+
+				if is_own {
+					terminal::set_foreground(Color::from_rgb(221, 221, 221));
+				}
+
 				terminal::print_xy(0, size.height - 3 - i as i32,
 				                   &*&format!("{} | {}: {}", strftime("%T", &message.time_posted).unwrap(), message.sender.name, message.value));
+
+				if is_own {
+					terminal::set_foreground(Color::from_rgb(255, 255, 255));
+				}
 			}
 			terminal::refresh();
 		}
