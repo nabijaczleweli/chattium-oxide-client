@@ -33,7 +33,7 @@ build_script:
   - cargo build %BUILD_OPTS%
   - if "%APPVEYOR_REPO_TAG%" == "true" copy target\release\chattium-oxide-client.exe artifacts\chattium-oxide-client.exe
   - if "%APPVEYOR_REPO_TAG%" == "true" strip --strip-all --remove-section=.comment --remove-section=.note artifacts/chattium-oxide-client.exe
-  - if "%APPVEYOR_REPO_TAG%" == "true" cd artifacts && 7z a chattium-oxide-client-%APPVEYOR_REPO_TAG_NAME%-windows-x64.zip * && cd ..
+  - if "%APPVEYOR_REPO_TAG%" == "true" cd artifacts && 7z a chattium-oxide-client-%APPVEYOR_REPO_TAG_NAME%-windows.zip * && cd ..
 
 test: off
 test_script:
