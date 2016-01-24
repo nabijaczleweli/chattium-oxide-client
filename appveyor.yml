@@ -33,18 +33,18 @@ build_script:
   - cargo build %BUILD_OPTS%
   - if "%APPVEYOR_REPO_TAG%" == "true" copy target\release\chattium-oxide-client.exe artifacts\chattium-oxide-client.exe
   - if "%APPVEYOR_REPO_TAG%" == "true" strip --strip-all --remove-section=.comment --remove-section=.note artifacts/chattium-oxide-client.exe
+  - if "%APPVEYOR_REPO_TAG%" == "true" cd artifacts && 7z a ..\chattium-oxide-client-%APPVEYOR_REPO_TAG_NAME%-windows-x64.zip * && cd ..
 
 test: off
 test_script:
   - cargo test %BUILD_OPTS%
 
 artifacts:
-  - path: artifacts\chattium-oxide-client.exe
-  - path: artifacts\BearLibTerminal.dll
+  - path: chattium-oxide-client-%APPVEYOR_REPO_TAG_NAME%-windows-x64.zip
 
 deploy:
   provider: GitHub
-  artifact: /artifacts\/.*/
+  artifact: chattium-oxide-client-%APPVEYOR_REPO_TAG_NAME%-windows-x64.zip
   auth_token:
     secure: +Z0gDrwqKHeDsAd3OiG45KXoPidtiNSsa5le3wfPj/YhOwlnSNOLFLuM7pccti50
   on:
