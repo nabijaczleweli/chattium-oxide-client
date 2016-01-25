@@ -1,19 +1,21 @@
-use Options;
-use std::io::{Read, Write};
-use std::sync::{Arc, RwLock};
-use std::thread::sleep_ms;
-use time::strftime;
-use hyper::client::Client;
-use hyper::method::Method;
-use bear_lib_terminal::{terminal, Color};
-use bear_lib_terminal::geometry::{Size, Rect, Point};
-use chattium_oxide_lib::{ChatMessage, ChatUser};
 use chattium_oxide_lib::json::{ToJsonnable, FromJsonnable, JsonError};
+use chattium_oxide_lib::{ChatMessage, ChatUser};
+use bear_lib_terminal::geometry::{Size, Rect, Point};
+use bear_lib_terminal::{terminal, Color};
+use std::io::{Read, Write};
+use hyper::method::Method;
+use hyper::client::Client;
+use time::strftime;
+use std::thread::sleep;
+use std::sync::{Arc, RwLock};
+use std::time::Duration;
+use Options;
 
 
 pub struct ResponseRequester {
 	server    : String,
 	me        : ChatUser,
+	time      : Duration,
 	client    : Arc<Client>,
 	keep_going: Arc<RwLock<bool>>,
 	messages  : Vec<ChatMessage>,
@@ -25,6 +27,7 @@ impl ResponseRequester {
 		ResponseRequester{
 			server    : options.server,
 			me        : ChatUser::me(options.name),
+			time      : options.time,
 			client    : client,
 			keep_going: keep_going,
 			messages  : Vec::new(),
@@ -59,7 +62,7 @@ impl ResponseRequester {
 				Err(error) => printerr!("Couldn't serialize message: {}\n", error),
 			}
 
-			sleep_ms(500);
+			sleep(self.time);
 		}
 	}
 

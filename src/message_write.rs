@@ -47,6 +47,7 @@ impl MessageWriter {
 						message = "".to_string();
 						let size = terminal::state::size();
 						terminal::clear(Some(Rect::from_point_values(0, size.height - 1, size.width, size.height - 1)));
+						terminal::refresh();
 					}
 				},
 				'\r' => {
