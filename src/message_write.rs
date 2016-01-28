@@ -1,4 +1,5 @@
 use Options;
+use io::maybe_trimmed_right;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
 use hyper::client::Client;
@@ -34,8 +35,8 @@ impl MessageWriter {
 				'\u{0}' => (),
 				'\u{1}' => break,
 				'\n'    => {
-					if !message.is_empty() {
-						match ChatMessage::new(ChatUser::me(self.username.clone()), message).to_json_string() {
+					if let Some(msg) = maybe_trimmed_right(&message) {
+						match ChatMessage::new(ChatUser::me(self.username.clone()), msg).to_json_string() {
 							Ok(json) =>
 								match self.client.post(&*&self.server).body(&*&json).send() {
 									Ok(response) => println!("Server responded with status {}", response.status),
@@ -44,8 +45,8 @@ impl MessageWriter {
 							Err(error) => printerr!("Couldn't serialize message: {}\n", error),
 						}
 
-						message = "".to_string();
 						let size = terminal::state::size();
+						message = "".to_string();
 						terminal::clear(Some(Rect::from_point_values(0, size.height - 1, size.width, size.height - 1)));
 						terminal::refresh();
 					}
