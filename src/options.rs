@@ -43,26 +43,31 @@ impl Options {
 		let mut splash: Option<String> = Some("1000".to_string());
 		let mut time  : Option<String> = Some("3000".to_string());
 
-		if let Some(conf) = matches.value_of("conf") {
+
+		if let Some(config) = matches.value_of("config") {
 			let mut yaml = YamlFileHandler::new();
-			if yaml.add_files(vec![conf]) {
+			if yaml.add_files(vec![config]) {
 				if let Some(yaml) = yaml.read_all_files().as_ref().map(|all| {
-					let mut b = PathBuf::from(conf);
+					let mut b = PathBuf::from(config);
 					b.set_extension("");
 					&all[b.file_name().unwrap().to_str().unwrap()]
 				}) {
 					name   = yaml["name"]  .as_str().map(|n| n.to_string());
 					server = yaml["server"].as_str().map(|s| s.to_string());
-					splash = yaml["splash"].as_str().map(|s| s.to_string());
-					time   = yaml["time"]  .as_str().map(|t| t.to_string());
+					if let Some(spl) = yaml["splash"].as_i64().map(|s| s.to_string()) {
+						splash = Some(spl);
+					}
+					if let Some(tme) = yaml["poll_time"].as_i64().map(|t| t.to_string()) {
+						time = Some(tme);
+					}
 				}
 			}
 		}
 
-		if let Some(cname)   = matches.value_of("name")   {if cname.len()   > 0 {name   = Some(cname.to_string())}}
-		if let Some(cserver) = matches.value_of("server") {if cserver.len() > 0 {server = Some(cserver.to_string())}}
-		if let Some(csplash) = matches.value_of("splash") {if csplash.len() > 0 {splash = Some(csplash.to_string())}}
-		if let Some(ctime)   = matches.value_of("time")   {if ctime.len() > 0   {time   = Some(ctime.to_string())}}
+		if let Some(cname)   = matches.value_of("name")      {if cname.len()   > 0 {name   = Some(cname.to_string())}}
+		if let Some(cserver) = matches.value_of("server")    {if cserver.len() > 0 {server = Some(cserver.to_string())}}
+		if let Some(csplash) = matches.value_of("splash")    {if csplash.len() > 0 {splash = Some(csplash.to_string())}}
+		if let Some(ctime)   = matches.value_of("poll-time") {if ctime.len() > 0   {time   = Some(ctime.to_string())}}
 
 		if name.is_none() {
 			name = Some(match username() {
