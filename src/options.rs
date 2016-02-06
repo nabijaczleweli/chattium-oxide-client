@@ -147,14 +147,7 @@ If that's incorrect, type in your name now. Otherwise, hit <Return>: ", uname));
 
 /// Extract username from last segment of user's homedir
 fn username() -> Option<String> {
-	match home_dir() {
-		Some(pbuf) =>
-			match pbuf.as_path().file_name() {
-				Some(fname) => fname.to_str().map(|string| string.to_string()),
-				None => None,
-			},
-		None => None,
-	}
+	home_dir().and_then(|pbuf| pbuf.as_path().file_name().and_then(|fname| fname.to_str().map(|string| string.to_string())))
 }
 
 fn validate_address(address: String) -> Result<String, String> {
