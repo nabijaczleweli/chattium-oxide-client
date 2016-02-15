@@ -29,6 +29,11 @@
 			"name": "Examples",
 			"path": "example"
 		},
+		{
+			"follow_symlinks": true,
+			"name": "Resources",
+			"path": "res"
+		},
 	],
 	"settings":
 	{
