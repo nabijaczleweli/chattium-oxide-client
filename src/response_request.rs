@@ -2,7 +2,7 @@ use chattium_oxide_lib::json::{ToJsonnable, FromJsonnable, JsonError};
 use chattium_oxide_lib::{ChatMessage, ChatUser};
 use bear_lib_terminal::geometry::{Size, Rect, Point};
 use bear_lib_terminal::{terminal, Color};
-use std::io::{Read, Write};
+use std::io::Read;
 use hyper::method::Method;
 use hyper::client::Client;
 use time::strftime;
